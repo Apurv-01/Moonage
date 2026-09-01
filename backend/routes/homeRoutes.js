@@ -6,6 +6,8 @@ import { likePost, unlikePost } from "../controllers/likePostController.js";
 import followUser from "../controllers/followUserController.js";
 import createComment from "../controllers/createCommentController.js";
 import fetchComments from "../controllers/fetchCommentsController.js";
+import fetchLikes from "../controllers/fetchLikesController.js";
+
 import {
   fetchFollowersList,
   fetchFollowingList,
@@ -14,6 +16,7 @@ import fetchUserController from "../controllers/fetchUserController.js";
 import { getLoggedInUserDetails } from "../controllers/fetchCurrentUserDetails.js";
 import logoutUser from "../controllers/logoutUser.js";
 import fetchProfile from "../controllers/fetchProfileController.js";
+
 const Router = express.Router();
 Router.get("/home", isAuthenticated, homeController);
 Router.post("/home", isAuthenticated, createPostController);
@@ -27,5 +30,6 @@ Router.post("/deleteLike", unlikePost);
 Router.get("/me", isAuthenticated, getLoggedInUserDetails);
 Router.post("/logout", logoutUser);
 Router.get("/user", isAuthenticated, fetchProfile);
+Router.get("/fetchLikes", fetchLikes);
 
 export default Router;

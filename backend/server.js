@@ -9,6 +9,8 @@ import http from "http";
 import { Server } from "socket.io";
 const app = express();
 
+app.set("view engine", "ejs");
+
 configDotenv();
 app.use(
   cors({
@@ -68,6 +70,13 @@ app.use(sessionMiddleWare);
 //   sessionMiddleWare(socket.request, {}, next);
 // });
 app.use("/api/user", userRoutes);
+app.use((err, req, res, next) => {
+  console.error("Server Error:", err);
+  res.status(err.status || 500).json({
+    error: err.name || "Error",
+    message: err.message || "An unexpected error occurred",
+  });
+});
 app.use("/api/dash", homeRoutes);
 
 app.get("/", (req, res) => {

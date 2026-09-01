@@ -13,7 +13,7 @@ const createUploader = (folder) => {
   const storage = new CloudinaryStorage({
     cloudinary,
     params: {
-      folder,
+      folder: folder,
       allowed_formats: ["jpg", "jpeg", "png", "webp"],
     },
   });
