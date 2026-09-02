@@ -15,8 +15,9 @@ const fetchProfile = async (req, res) => {
         .find({ followerId: userId })
         .populate("followingId", "username profile_picture_url bio"),
     ]);
-    const isFollowing = followers.some((uid) => uid == loggedInUser);
-    console.log(isFollowing);
+    const isFollowing = followers.some(
+      (uid) => uid.followerId._id.toString() == loggedInUser,
+    );
     res.status(200).json({
       user,
       posts,

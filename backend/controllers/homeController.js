@@ -34,7 +34,11 @@ const homeController = async (req, res) => {
   //Liked,commented by people you follow or they are author
   const post = await postModel
     .find({
-      $or: [{ _id: { $in: uniquePostIds } }, { author: { $in: followingIds } }],
+      $or: [
+        { _id: { $in: uniquePostIds } },
+        { author: { $in: followingIds } },
+        // { author: userId },
+      ],
     })
     .populate("author", "_id username profile_picture_url")
     .sort({ createdAt: -1 });

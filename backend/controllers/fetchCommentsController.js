@@ -8,6 +8,7 @@ const fetchComments = async (req, res) => {
         postId: postId,
         commentId: commentId,
       })
+      .populate("authorId", "username profile_picture_url")
       .sort({ createdAt: -1 });
     res.status(200).json({ comments });
   } catch (error) {

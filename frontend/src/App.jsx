@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/Login/Login.jsx";
 import Home from "./pages/Home/Home.jsx";
 import ProtectRoute from "../protectRoute.jsx";
+import Profile from "./pages/Profile/Profile.jsx";
 function App() {
   return (
     <>
@@ -12,10 +13,18 @@ function App() {
           path="/home"
           element={
             <ProtectRoute>
-              <Home />{" "}
+              <Home />
             </ProtectRoute>
           }
-        ></Route>
+        />
+        <Route
+          path="/profile/:userId"
+          element={
+            <ProtectRoute>
+              <Profile />
+            </ProtectRoute>
+          }
+        />
       </Routes>
     </>
   );

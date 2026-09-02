@@ -9,12 +9,31 @@ import {
   MessageCircle,
   X,
 } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 export default function Home() {
   const [postText, setPostText] = useState("");
   const [activePost, setActivePost] = useState(null);
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const [myUserId, setMyUserId] = useState(null);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/dash/me", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setMyUserId(data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchMe();
+  }, []);
 
   useEffect(() => {
     fetchPosts();
@@ -45,9 +64,18 @@ export default function Home() {
           Circle
         </h2>
         <nav className="flex flex-col gap-1">
-          <SidebarLink icon={<HomeIcon size={18} />} label="Home" active />
+          <SidebarLink
+            icon={<HomeIcon size={18} />}
+            onClick={() => navigate(`/home`)}
+            label="Home"
+            active
+          />
           <SidebarLink icon={<Compass size={18} />} label="Explore" />
-          <SidebarLink icon={<User size={18} />} label="Profile" />
+          <SidebarLink
+            icon={<User size={18} />}
+            onClick={() => navigate(`/profile/${myUserId.userId}`)}
+            label="Profile"
+          />
         </nav>
       </aside>
 
@@ -67,10 +95,11 @@ export default function Home() {
               className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-400 transition-colors bg-gray-50"
             />
           </div>
-          <img
-            src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=80&h=80&fit=crop&crop=faces"
-            alt="Your profile"
-            className="w-8 h-8 rounded-full object-cover"
+          <Avatar
+            src={myUserId?.pp}
+            username={myUserId?.username}
+            size={32}
+            className="w-8 h-8"
           />
         </header>
 
@@ -80,10 +109,11 @@ export default function Home() {
             {/* Create post box */}
             <div className="bg-white border border-gray-200 rounded-2xl p-4">
               <div className="flex gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=80&h=80&fit=crop&crop=faces"
-                  alt="Your avatar"
-                  className="w-9 h-9 rounded-full object-cover"
+                <Avatar
+                  src={myUserId?.pp}
+                  username={myUserId?.username}
+                  size={32}
+                  className="w-8 h-8"
                 />
                 <textarea
                   value={postText}
@@ -126,9 +156,18 @@ export default function Home() {
 
       {/* Mobile bottom tab bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 z-20">
-        <TabButton icon={<HomeIcon size={20} />} label="Home" active />
+        <TabButton
+          icon={<HomeIcon size={20} />}
+          onClick={() => navigate(`/home`)}
+          label="Home"
+          active
+        />
         <TabButton icon={<Compass size={20} />} label="Explore" />
-        <TabButton icon={<User size={20} />} label="Profile" />
+        <TabButton
+          icon={<User size={20} />}
+          onClick={() => navigate(`/profile/${myUserId.userId}`)}
+          label="Profile"
+        />
       </nav>
 
       {activePost && (
@@ -138,9 +177,10 @@ export default function Home() {
   );
 }
 
-function TabButton({ icon, label, active }) {
+function TabButton({ icon, label, active, onClick }) {
   return (
     <button
+      onClick={onClick}
       className={`flex flex-col items-center gap-0.5 px-4 py-1 text-xs transition-colors ${
         active ? "text-gray-900" : "text-gray-400"
       }`}
@@ -151,9 +191,10 @@ function TabButton({ icon, label, active }) {
   );
 }
 
-function SidebarLink({ icon, label, active }) {
+function SidebarLink({ icon, label, active, onClick }) {
   return (
     <button
+      onClick={onClick}
       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
         active
           ? "bg-gray-100 text-gray-900 font-medium"
@@ -165,12 +206,36 @@ function SidebarLink({ icon, label, active }) {
     </button>
   );
 }
+function Avatar({ src, username, size = 32, className = "" }) {
+  const [failed, setFailed] = useState(false);
+  const initial = username?.[0]?.toUpperCase() || "?";
 
+  if (!src || failed) {
+    return (
+      <div
+        className={`shrink-0 rounded-full bg-gray-200 text-gray-500 font-medium flex items-center justify-center ${className}`}
+        style={{ width: size, height: size, fontSize: size * 0.4 }}
+      >
+        {initial}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={username}
+      onError={() => setFailed(true)}
+      className={`shrink-0 rounded-full object-cover ${className}`}
+      style={{ width: size, height: size }}
+    />
+  );
+}
 function PostCard({ post, onCommentClick }) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
   useEffect(() => {
-    const fetchLikes = async () => {
+    const fetchPostLikes = async () => {
       try {
         const res = await fetch(
           `http://localhost:5000/api/dash/fetchLikes/?post=${post._id}`,
@@ -179,30 +244,48 @@ function PostCard({ post, onCommentClick }) {
             credentials: "include",
           },
         );
-        if (!res.ok) {
-          throw new Error("Failed to fetch likes");
-        }
+        if (!res.ok) throw new Error("Cannot Fetch Likess");
         const data = await res.json();
         setLikeCount(data.likes.length);
         setLiked(data.isLikedByMe);
       } catch (err) {
-        console.log(err);
+        throw new Error(err);
       }
     };
-    fetchLikes();
+    fetchPostLikes();
   }, [post._id]);
-  const toggleLike = () => {
-    setLiked((l) => !l);
+  const toggleLike = async () => {
+    const wasLiked = liked;
+    setLiked(!wasLiked);
     setLikeCount((c) => (liked ? c - 1 : c + 1));
+    try {
+      const url = wasLiked
+        ? "http://localhost:5000/api/dash/deleteLike"
+        : "http://localhost:5000/api/dash/likePost";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ postId: post._id }),
+      });
+      if (!res.ok) throw new Error("Unable to Like this post");
+    } catch (err) {
+      throw new Error(err);
+      setLiked(wasLiked);
+      setLikeCount((c) => {
+        liked ? c + 1 : c - 1;
+      });
+    }
   };
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
       <div className="flex items-center gap-3 px-4 py-3">
-        <img
+        <Avatar
           src={post.author.profile_picture_url}
-          alt={post.author.username}
-          className="w-8 h-8 rounded-full object-cover"
+          username={post.author.username}
+          size={32}
+          className="w-8 h-8"
         />
         <span className="text-sm font-medium text-gray-900">
           {post.author.username}
@@ -258,29 +341,51 @@ function PostCard({ post, onCommentClick }) {
 
 function CommentSidebar({ post, onClose }) {
   const inputRef = useRef(null);
-  let [comments, setComments] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [posting, setPosting] = useState(false);
 
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const res = await fetch(
-          "http://localhost:5000/api/dash/fetchComments/?post=${post._id}",
-          {
-            method: "GET",
-            credentials: "include",
-          },
-        );
-        if (!res.ok) {
-          throw new Error("Cannot Fetch Comments");
-        }
-        const data = res.json();
-        setComments(data);
-      } catch (err) {
-        throw new Error(err.message);
-      }
-    };
     inputRef.current?.focus();
-  }, [post]);
+    fetchComments();
+  }, [post._id]);
+
+  const fetchComments = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/dash/fetchComments?post=${post._id}`,
+        { method: "GET", credentials: "include" },
+      );
+      if (!res.ok) throw new Error("Failed to fetch comments");
+      const data = await res.json();
+      setComments(data.comments);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handlePostComment = async () => {
+    if (!newComment.trim()) return;
+    setPosting(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/dash/createComment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          commentText: newComment,
+          postId: post._id,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to post comment");
+      setNewComment("");
+      fetchComments();
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setPosting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 md:left-56 z-30 bg-white flex flex-col">
@@ -288,10 +393,11 @@ function CommentSidebar({ post, onClose }) {
         <button onClick={onClose} className="text-gray-400 hover:text-gray-700">
           <X size={18} />
         </button>
-        <img
+        <Avatar
           src={post.author.profile_picture_url}
-          alt={post.author.username}
-          className="w-8 h-8 rounded-full object-cover"
+          username={post.author.username}
+          size={32}
+          className="w-8 h-8"
         />
         <span className="text-sm font-medium text-gray-900">
           {post.author.username}
@@ -318,26 +424,213 @@ function CommentSidebar({ post, onClose }) {
             Comments
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-3 text-sm">
-            <p className="text-gray-700 mb-3">
+          <div className="flex-1 overflow-y-auto px-4 py-3 text-sm space-y-4">
+            <p className="text-gray-700">
               <span className="font-medium text-gray-900">
                 {post.author.username}
               </span>{" "}
               {post.postContent}
             </p>
-            <p className="text-gray-400">No comments yet.</p>
+
+            {comments.length === 0 ? (
+              <p className="text-gray-400">No comments yet.</p>
+            ) : (
+              comments.map((comment) => (
+                <CommentItem
+                  key={comment._id}
+                  comment={comment}
+                  onReplyPosted={fetchComments}
+                />
+              ))
+            )}
           </div>
 
-          <div className="border-t border-gray-200 p-3">
+          <div className="border-t border-gray-200 p-3 flex gap-2">
             <input
               ref={inputRef}
               type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handlePostComment()}
               placeholder="Add a comment..."
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-gray-400"
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-gray-400"
             />
+            <button
+              onClick={handlePostComment}
+              disabled={posting || !newComment.trim()}
+              className="text-sm font-medium text-gray-900 disabled:opacity-40 px-2"
+            >
+              Post
+            </button>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CommentItem({ comment, onReplyPosted }) {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [showReplyBox, setShowReplyBox] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replies, setReplies] = useState([]);
+  const [showReplies, setShowReplies] = useState(false);
+  const [loadingReplies, setLoadingReplies] = useState(false);
+
+  useEffect(() => {
+    const fetchCommentLikes = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/dash/fetchLikes?comment=${comment._id}`,
+          { method: "GET", credentials: "include" },
+        );
+        if (!res.ok) throw new Error("Failed to fetch likes");
+        const data = await res.json();
+        setLikeCount(data.likes.length);
+        setLiked(data.isLikedByMe);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchCommentLikes();
+  }, [comment._id]);
+
+  const toggleLike = async () => {
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
+    try {
+      const url = wasLiked
+        ? "http://localhost:5000/api/dash/deleteLike"
+        : "http://localhost:5000/api/dash/likePost";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ commentId: comment._id }),
+      });
+      if (!res.ok) throw new Error("Failed to update like");
+    } catch (err) {
+      console.log(err);
+      setLiked(wasLiked);
+      setLikeCount((c) => (wasLiked ? c + 1 : c - 1));
+    }
+  };
+
+  const fetchReplies = async () => {
+    setLoadingReplies(true);
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/dash/fetchComments?comment=${comment._id}`,
+        { method: "GET", credentials: "include" },
+      );
+      if (!res.ok) throw new Error("Failed to fetch replies");
+      const data = await res.json();
+      setReplies(data.comments);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoadingReplies(false);
+    }
+  };
+
+  const toggleReplies = () => {
+    if (!showReplies) fetchReplies();
+    setShowReplies((s) => !s);
+  };
+
+  const handlePostReply = async () => {
+    if (!replyText.trim()) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/dash/createComment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          commentText: replyText,
+          commentId: comment._id,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to post reply");
+      setReplyText("");
+      setShowReplyBox(false);
+      if (showReplies) fetchReplies();
+      onReplyPosted?.();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
+    <div className="text-sm">
+      <p className="text-gray-700">
+        <span className="font-medium text-gray-900">
+          {comment.authorId?.username || "user"}
+        </span>{" "}
+        {comment.commentText}
+      </p>
+      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+        <button
+          onClick={toggleLike}
+          className={`flex items-center gap-1 hover:text-gray-700 transition-colors ${
+            liked ? "text-red-500" : ""
+          }`}
+        >
+          <Heart size={13} className={liked ? "fill-red-500" : ""} />
+          {likeCount > 0 && likeCount}
+        </button>
+        <button
+          onClick={() => setShowReplyBox((s) => !s)}
+          className="hover:text-gray-700 transition-colors"
+        >
+          Reply
+        </button>
+        <button
+          onClick={toggleReplies}
+          className="hover:text-gray-700 transition-colors"
+        >
+          {showReplies ? "Hide replies" : "View replies"}
+        </button>
+      </div>
+
+      {showReplyBox && (
+        <div className="flex gap-2 mt-2">
+          <input
+            type="text"
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handlePostReply()}
+            placeholder="Write a reply..."
+            className="flex-1 px-2 py-1 rounded-md border border-gray-200 text-xs focus:outline-none focus:border-gray-400"
+          />
+          <button
+            onClick={handlePostReply}
+            disabled={!replyText.trim()}
+            className="text-xs font-medium text-gray-900 disabled:opacity-40"
+          >
+            Post
+          </button>
+        </div>
+      )}
+
+      {showReplies && (
+        <div className="mt-2 ml-4 pl-3 border-l border-gray-100 space-y-3">
+          {loadingReplies && (
+            <p className="text-xs text-gray-400">Loading...</p>
+          )}
+          {!loadingReplies && replies.length === 0 && (
+            <p className="text-xs text-gray-400">No replies yet.</p>
+          )}
+          {replies.map((reply) => (
+            <CommentItem
+              key={reply._id}
+              comment={reply}
+              onReplyPosted={fetchReplies}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
