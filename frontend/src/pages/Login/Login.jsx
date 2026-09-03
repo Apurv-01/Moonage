@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { User, AtSign, Mail, Lock, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 export default function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState("login"); // "login" | "register"
@@ -39,11 +40,11 @@ export default function AuthPage() {
         });
         if (!res.ok) {
           const data = await res.json().catch(() => {});
-          throw new Error(data.message || "Invalid Password");
+          // throw new Error(data.message || "Invalid Password");
+          toast.error(data.message || "Invalid Username or Password");
         }
         const data = await res.json();
-        console.log(data);
-
+        toast.success("Login Successful");
         localStorage.setItem("token", data.token);
         navigate("/home");
       } else {
@@ -62,15 +63,16 @@ export default function AuthPage() {
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.message || "Registration failed");
+          toast.error(data.message || "Registration failed");
         }
 
         const data = await res.json();
-        console.log(data);
+        toast.success("Registered");
         localStorage.setItem("token", data.token);
         navigate("/home");
       }
     } catch (error) {
+      // toast.error(error.message);
       console.log(error);
     }
   };

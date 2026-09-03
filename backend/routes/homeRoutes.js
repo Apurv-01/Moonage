@@ -7,7 +7,7 @@ import followUser from "../controllers/followUserController.js";
 import createComment from "../controllers/createCommentController.js";
 import fetchComments from "../controllers/fetchCommentsController.js";
 import fetchLikes from "../controllers/fetchLikesController.js";
-
+import { findUsers } from "../controllers/searchController.js";
 import {
   fetchFollowersList,
   fetchFollowingList,
@@ -16,10 +16,17 @@ import fetchUserController from "../controllers/fetchUserController.js";
 import { getLoggedInUserDetails } from "../controllers/fetchCurrentUserDetails.js";
 import logoutUser from "../controllers/logoutUser.js";
 import fetchProfile from "../controllers/fetchProfileController.js";
+import { uploadPP } from "../cloudinary-config.js";
+import { unfollowUser } from "../controllers/unfollowUser.js";
 
 const Router = express.Router();
 Router.get("/home", isAuthenticated, homeController);
-Router.post("/home", isAuthenticated, createPostController);
+Router.post(
+  "/home",
+  isAuthenticated,
+  uploadPP.single("image"),
+  createPostController,
+);
 Router.post("/likePost", isAuthenticated, likePost);
 Router.post("/followUser", isAuthenticated, followUser);
 Router.post("/createComment", isAuthenticated, createComment);
@@ -31,5 +38,7 @@ Router.get("/me", isAuthenticated, getLoggedInUserDetails);
 Router.post("/logout", logoutUser);
 Router.get("/user", isAuthenticated, fetchProfile);
 Router.get("/fetchLikes", fetchLikes);
+Router.get("/searchUsers", isAuthenticated, findUsers);
+Router.post("/unfollowUser", isAuthenticated, unfollowUser);
 
 export default Router;

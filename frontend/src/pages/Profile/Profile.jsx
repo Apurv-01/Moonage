@@ -1,16 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Home as HomeIcon,
-  Compass,
-  User,
-  ArrowLeft,
-  Grid3x3,
-  Heart,
-  MessageCircle,
-  X,
-} from "lucide-react";
-
+import { ArrowLeft, Grid3x3, Heart, MessageCircle, X } from "lucide-react";
+import { toast } from "react-toastify";
+import Sidebar from "../../components/Sidebar.jsx";
 export default function Profile() {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -37,7 +29,7 @@ export default function Profile() {
         method: "GET",
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Not logged in");
+      if (!res.ok) toast.error("Not logged in");
       const data = await res.json();
       setCurrentUserId(data.userId);
     } catch (err) {
@@ -53,7 +45,7 @@ export default function Profile() {
         `http://localhost:5000/api/dash/user?userId=${id}`,
         { method: "GET", credentials: "include" },
       );
-      if (!res.ok) throw new Error("Cannot load this profile");
+      if (!res.ok) toast.error("Cannot load this profile");
       const data = await res.json();
       setProfileData(data);
     } catch (err) {
@@ -73,9 +65,9 @@ export default function Profile() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ followingId: userId }),
       });
-      if (!res.ok) throw new Error("Failed to update follow status");
+      if (!res.ok) toast.error("Failed to update follow status");
       fetchProfile(userId);
     } catch (err) {
       console.log(err);
@@ -89,21 +81,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <aside className="hidden md:flex w-56 flex-col border-r border-gray-200 bg-white px-4 py-6 sticky top-0 h-screen">
-        <h2 className="text-lg font-semibold text-gray-900 mb-8 px-2">
-          Circle
-        </h2>
-        <nav className="flex flex-col gap-1">
-          <SidebarLink
-            icon={<HomeIcon size={18} />}
-            label="Home"
-            onClick={() => navigate("/home")}
-          />
-          <SidebarLink icon={<Compass size={18} />} label="Explore" />
-          <SidebarLink icon={<User size={18} />} label="Profile" active />
-        </nav>
-      </aside>
-
+      <Sidebar />
       {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-3">
@@ -130,11 +108,11 @@ export default function Profile() {
               <p className="text-sm text-red-500 text-center mt-10">{error}</p>
             )}
 
-            {!loading && !error && profileData && (
+            {!loading && !error && profileData && profileData.user && (
               <>
                 <div className="flex items-center gap-6 mb-6">
                   <Avatar
-                    src={profileData.user.profile_picture_url}
+                    src={profileData.user?.profile_picture_url}
                     username={profileData.user.username}
                     size={80}
                   />
@@ -258,17 +236,6 @@ export default function Profile() {
         </main>
       </div>
 
-      {/* Mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-2 z-20">
-        <TabButton
-          icon={<HomeIcon size={20} />}
-          label="Home"
-          onClick={() => navigate("/home")}
-        />
-        <TabButton icon={<Compass size={20} />} label="Explore" />
-        <TabButton icon={<User size={20} />} label="Profile" active />
-      </nav>
-
       {listView && profileData && (
         <UserListPanel
           title={listView === "followers" ? "Followers" : "Following"}
@@ -333,36 +300,6 @@ function Stat({ label, value, onClick }) {
       <div className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
         {label}
       </div>
-    </button>
-  );
-}
-
-function SidebarLink({ icon, label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-        active
-          ? "bg-gray-100 text-gray-900 font-medium"
-          : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
-function TabButton({ icon, label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center gap-0.5 px-4 py-1 text-xs transition-colors ${
-        active ? "text-gray-900" : "text-gray-400"
-      }`}
-    >
-      {icon}
-      {label}
     </button>
   );
 }
@@ -434,9 +371,9 @@ function UserListItem({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ userId: person._id }),
+        body: JSON.stringify({ followingId: person._id }),
       });
-      if (!res.ok) throw new Error("Failed to unfollow");
+      if (!res.ok) toast.error("Failed to unfollow");
       onListChanged?.();
     } catch (err) {
       console.log(err);
@@ -496,7 +433,7 @@ function CommentSidebar({ post, onClose }) {
         `http://localhost:5000/api/dash/fetchComments?post=${post._id}`,
         { method: "GET", credentials: "include" },
       );
-      if (!res.ok) throw new Error("Failed to fetch comments");
+      if (!res.ok) toast.error("Failed to fetch comments");
       const data = await res.json();
       setComments(data.comments);
     } catch (err) {
@@ -517,7 +454,7 @@ function CommentSidebar({ post, onClose }) {
           postId: post._id,
         }),
       });
-      if (!res.ok) throw new Error("Failed to post comment");
+      if (!res.ok) toast.error("Failed to post comment");
       setNewComment("");
       fetchComments();
     } catch (err) {
@@ -624,7 +561,7 @@ function CommentItem({ comment, onReplyPosted }) {
           `http://localhost:5000/api/dash/fetchLikes?comment=${comment._id}`,
           { method: "GET", credentials: "include" },
         );
-        if (!res.ok) throw new Error("Failed to fetch likes");
+        if (!res.ok) toast.error("Failed to fetch likes");
         const data = await res.json();
         setLikeCount(data.likes.length);
         setLiked(data.isLikedByMe);
@@ -649,7 +586,7 @@ function CommentItem({ comment, onReplyPosted }) {
         credentials: "include",
         body: JSON.stringify({ commentId: comment._id }),
       });
-      if (!res.ok) throw new Error("Failed to update like");
+      if (!res.ok) toast.error("Failed to update like");
     } catch (err) {
       console.log(err);
       setLiked(wasLiked);
@@ -664,7 +601,7 @@ function CommentItem({ comment, onReplyPosted }) {
         `http://localhost:5000/api/dash/fetchComments?comment=${comment._id}`,
         { method: "GET", credentials: "include" },
       );
-      if (!res.ok) throw new Error("Failed to fetch replies");
+      if (!res.ok) toast.error("Failed to fetch replies");
       const data = await res.json();
       setReplies(data.comments);
     } catch (err) {
@@ -691,7 +628,7 @@ function CommentItem({ comment, onReplyPosted }) {
           commentId: comment._id,
         }),
       });
-      if (!res.ok) throw new Error("Failed to post reply");
+      if (!res.ok) toast.error("Failed to post reply");
       setReplyText("");
       setShowReplyBox(false);
       if (showReplies) fetchReplies();

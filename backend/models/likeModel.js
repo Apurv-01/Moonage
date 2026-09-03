@@ -17,6 +17,12 @@ const likeSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-likeSchema.index({ postId: 1, likedBy: 1 }, { unique: true, sparse: true });
-likeSchema.index({ commentId: 1, likedBy: 1 }, { unique: true, sparse: true });
+likeSchema.index(
+  { postId: 1, likedBy: 1 },
+  { unique: true, partialFilterExpression: { postId: { $exists: true } } },
+);
+likeSchema.index(
+  { commentId: 1, likedBy: 1 },
+  { unique: true, partialFilterExpression: { commentId: { $exists: true } } },
+);
 export default mongoose.model("Like", likeSchema);

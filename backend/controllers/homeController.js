@@ -18,7 +18,10 @@ const homeController = async (req, res) => {
   const postIdsCommentbyFollowing = postDocsCommentbyFollowing.map(
     (d) => d.postId,
   );
-  const allPostIds = [...postIdsCommentbyFollowing, ...postIdsLikedbyFollowing];
+  const allPostIds = [
+    ...postIdsCommentbyFollowing,
+    ...postIdsLikedbyFollowing,
+  ].filter(Boolean);
   const uniquePostIdsString = [...new Set(allPostIds.map((d) => d.toString()))];
   const uniquePostIds = uniquePostIdsString.map(
     (id) => new mongoose.Types.ObjectId(id),
