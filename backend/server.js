@@ -36,6 +36,9 @@ app.use((req, res, next) => {
   if (req.params) req.params = mongoSanitize.sanitize(req.params);
   next();
 });
+app.get("/ping", (req, res) => {
+  res.status(200).send("pong");
+});
 app.set("trust proxy", 1);
 
 const globalLimiter = rateLimit({
