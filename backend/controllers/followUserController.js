@@ -9,7 +9,7 @@ const followUser = async (req, res) => {
       followingId: personToFollow,
     });
     res.status(200).json({ message: "Person Followed" });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

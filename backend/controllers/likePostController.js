@@ -19,7 +19,7 @@ const likePost = async (req, res) => {
       likedBy: userId,
     });
     res.status(200).json({ message: "Liked!" });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };
@@ -35,7 +35,7 @@ const unlikePost = async (req, res) => {
 
     await likeModel.deleteOne(filter);
     res.status(200).json({ message: "Unliked!" });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

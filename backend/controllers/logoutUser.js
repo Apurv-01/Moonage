@@ -6,8 +6,13 @@ const logoutUser = (req, res) => {
         message: err.message,
       });
     }
-    res.clearCookie("connect.sid");
-    res.json({
+    res.clearCookie("connect.sid", {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "prod",
+      sameSite: process.env.NODE_ENV === "prod" ? "strict" : "lax",
+    });
+    res.status(200).json({
       message: "Logged out successfully",
     });
   });

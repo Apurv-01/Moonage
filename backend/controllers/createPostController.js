@@ -11,7 +11,7 @@ const createPostController = async (req, res) => {
     });
     await post.save();
     res.status(200).json({ Message: "Post Saved" });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

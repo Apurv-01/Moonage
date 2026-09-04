@@ -8,6 +8,7 @@ function ProtectRoute({ children }) {
         const res = await fetch("http://localhost:5000/api/dash/me", {
           method: "GET",
           credentials: "include",
+          cache: "no-store",
         });
         setAuthState(res.ok ? "auth" : "guest");
       } catch {

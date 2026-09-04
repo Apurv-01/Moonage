@@ -10,11 +10,20 @@ const loginController = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Wrong Password" });
     req.session.userId = user._id;
+    req.session.regenerate((err) => {
+      if (err) return next(err);
 
-    res.status(200).json({
-      msg: "Login Sucessful",
+      req.session.userId = user._id;
+
+      req.session.save((saveErr) => {
+        if (saveErr) return next(saveErr);
+
+        return res.status(200).json({
+          msg: "Login Sucessful",
+        });
+      });
     });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

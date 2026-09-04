@@ -37,7 +37,7 @@ function CreatePost({ myUserId }) {
       setPostText("");
       setPostImg(null);
       setImgPreview(null);
-    } catch (error) {
+    } catch (err) {
       console.log(error);
     } finally {
       setPosting(false);

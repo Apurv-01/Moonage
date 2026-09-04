@@ -43,7 +43,7 @@ function Sidebar({ myUserId, loading }) {
     <>
       <aside className="hidden md:flex w-56 flex-col border-r border-gray-200 bg-white px-4 py-6 sticky top-0 h-screen">
         <h2 className="text-lg font-semibold text-gray-900 mb-8 px-2">
-          Circle
+          Moonage
         </h2>
         <nav className="flex flex-col gap-1 h-full">
           <SidebarLink

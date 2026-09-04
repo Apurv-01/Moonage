@@ -13,7 +13,7 @@ const createComment = async (req, res) => {
       authorId: userId,
     });
     res.status(200).json({ message: "comment created" });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
       error: "Cannot create Comment",
       message: error.message,

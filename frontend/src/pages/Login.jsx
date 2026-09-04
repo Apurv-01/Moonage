@@ -2,18 +2,19 @@ import { useState } from "react";
 import { User, AtSign, Mail, Lock, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useCurrentUser } from "../components/CurrentUser";
 export default function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState("login"); // "login" | "register"
   const [dpPreview, setDpPreview] = useState(null);
   const [dpURL, setDpURL] = useState(null);
+  const { refetchCurrentUser } = useCurrentUser();
   const [form, setForm] = useState({
     name: "",
     username: "",
     email: "",
     password: "",
   });
-
   const update = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -42,10 +43,12 @@ export default function AuthPage() {
           const data = await res.json().catch(() => {});
           // throw new Error(data.message || "Invalid Password");
           toast.error(data.message || "Invalid Username or Password");
+          return;
         }
         const data = await res.json();
         toast.success("Login Successful");
         localStorage.setItem("token", data.token);
+        await refetchCurrentUser();
         navigate("/home");
       } else {
         const res = await fetch(
@@ -67,6 +70,7 @@ export default function AuthPage() {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           toast.error(data.message || "Registration failed");
+          return;
         }
 
         const data = await res.json();
@@ -74,9 +78,9 @@ export default function AuthPage() {
         localStorage.setItem("token", data.token);
         navigate("/home");
       }
-    } catch (error) {
-      // toast.error(error.message);
-      console.log(error);
+    } catch (err) {
+      toast.error("Unexpected Error");
+      console.log(err);
     }
   };
 

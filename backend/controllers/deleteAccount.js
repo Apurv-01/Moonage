@@ -32,7 +32,7 @@ const deleteAccount = async (req, res) => {
       res.clearCookie("connect.sid");
       res.status(200).json({ message: "Account deleted" });
     });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

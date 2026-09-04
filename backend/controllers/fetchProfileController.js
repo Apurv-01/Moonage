@@ -30,7 +30,7 @@ const fetchProfile = async (req, res) => {
       },
       isFollowing,
     });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

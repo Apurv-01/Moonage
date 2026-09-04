@@ -4,7 +4,7 @@ const fetchUser = async (req, res) => {
     const userId = req.query.userId;
     const user = await userModel.findById(userId);
     res.status(200).json({ user });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

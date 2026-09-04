@@ -29,7 +29,7 @@ const registerController = async (req, res) => {
       profile_picture_id: imgPublicId,
     });
     res.status(200).json({ msg: "user registered" });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

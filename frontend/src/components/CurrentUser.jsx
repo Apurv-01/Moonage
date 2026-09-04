@@ -12,6 +12,7 @@ export function CurrentUserProvider({ children }) {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/dash/me`, {
         method: "GET",
         credentials: "include",
+        cache: "no-store",
       });
       if (!res.ok) {
         setCurrentUser(null);

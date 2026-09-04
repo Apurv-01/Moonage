@@ -28,6 +28,7 @@ export default function Home() {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         toast.error(data.message || "Cannot fetch posts");
+        return;
       }
       const data = await res.json();
       setPosts(data);

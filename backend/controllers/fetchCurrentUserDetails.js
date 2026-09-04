@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import userModel from "../models/userModel.js";
 const getLoggedInUserDetails = async (req, res) => {
   try {
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, private",
+    );
     const userId = req.session.userId;
     const currentUser = await userModel.findById(userId);
     if (!currentUser) return res.status(404).json({ error: "User not found" });
@@ -11,7 +15,7 @@ const getLoggedInUserDetails = async (req, res) => {
       username: currentUser.username,
       pp: currentUser.profile_picture_url,
     });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

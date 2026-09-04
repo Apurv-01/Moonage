@@ -16,7 +16,7 @@ const fetchFollowersList = async (req, res) => {
     res.status(200).json({
       followerList,
     });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };
@@ -36,7 +36,7 @@ const fetchFollowingList = async (req, res) => {
     res.status(200).json({
       followingList,
     });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };

@@ -14,7 +14,7 @@ const fetchLikes = async (req, res) => {
       (like) => like.likedBy.toString() === userId,
     );
     res.status(200).json({ likes, isLikedByMe });
-  } catch (error) {
+  } catch (err) {
     next(err);
   }
 };
