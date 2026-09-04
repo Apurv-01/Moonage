@@ -112,7 +112,7 @@ function Trending() {
       setPostsLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.API}/dash/trendingPosts?range=${postsRange}`,
+          `${import.meta.env.VITE_API_URL}/dash/trendingPosts?range=${postsRange}`,
           { method: "GET", credentials: "include" },
         );
         if (!res.ok) throw new Error("Cannot fetch trending posts");
@@ -133,7 +133,7 @@ function Trending() {
       setUsersLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.API}/dash/trendingUsers?range=${usersRange}`,
+          `${import.meta.env.VITE_API_URL}/dash/trendingUsers?range=${usersRange}`,
           { method: "GET", credentials: "include" },
         );
         if (!res.ok) throw new Error("Cannot fetch trending users");
@@ -167,8 +167,8 @@ function Trending() {
     );
     try {
       const url = wasFollowing
-        ? "${import.meta.env.API}/dash/unfollowUser"
-        : "${import.meta.env.API}/dash/followUser";
+        ? `${import.meta.env.VITE_API_URL}/dash/unfollowUser`
+        : `${import.meta.env.VITE_API_URL}/dash/followUser`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

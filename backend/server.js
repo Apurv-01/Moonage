@@ -30,14 +30,18 @@ app.use(
   }),
 );
 app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true, limit: "10kb" }));
-app.use(mongoSanitize());
+app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  if (req.body) req.body = mongoSanitize.sanitize(req.body);
+  if (req.params) req.params = mongoSanitize.sanitize(req.params);
+  next();
+});
 app.set("trust proxy", 1);
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: { message: "Too many requests, Chill Dady." },
+  message: { message: "Too many requests, Chill Daddy." },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -46,10 +50,10 @@ app.use("/api", globalLimiter);
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: { message: "Too many requests, Chill Dady." },
+  message: { message: "Too many requests, Chill Daddy." },
 });
-app.use("/api/auth/login", authLimiter);
-app.use("/api/auth/register", authLimiter);
+app.use("/api/user/login", authLimiter);
+app.use("/api/user/register", authLimiter);
 
 // const users = new Map();
 // const server = http.createServer(app);
@@ -126,7 +130,7 @@ app.use((err, req, res, next) => {
       : err.message,
   });
 });
-app.listen(process.env.PORT || 5000, () => {
+const server = app.listen(process.env.PORT || 5000, () => {
   console.log("hello world");
 });
 const gracefulShutdown = () => {

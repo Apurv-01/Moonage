@@ -24,10 +24,13 @@ export default function Profile() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${import.meta.env.API}/dash/user?userId=${id}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/dash/user?userId=${id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
       if (!res.ok) toast.error("Cannot load this profile");
       const data = await res.json();
       setProfileData(data);
@@ -42,8 +45,8 @@ export default function Profile() {
     setFollowLoading(true);
     try {
       const url = profileData.isFollowing
-        ? "${import.meta.env.API}/dash/unfollowUser"
-        : "${import.meta.env.API}/dash/followUser";
+        ? `${import.meta.env.VITE_API_URL}/dash/unfollowUser`
+        : `${import.meta.env.VITE_API_URL}/dash/followUser`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -350,12 +353,15 @@ function UserListItem({
   const handleUnfollow = async () => {
     setLoading(true);
     try {
-      const res = await fetch("${import.meta.env.API}/dash/unfollowUser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ followingId: person._id }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/dash/unfollowUser`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ followingId: person._id }),
+        },
+      );
       if (!res.ok) toast.error("Failed to unfollow");
       onListChanged?.();
     } catch (err) {
@@ -413,7 +419,7 @@ function CommentSidebar({ post, onClose }) {
   const fetchComments = async () => {
     try {
       const res = await fetch(
-        `${import.meta.env.API}/dash/fetchComments?post=${post._id}`,
+        `${import.meta.env.VITE_API_URL}/dash/fetchComments?post=${post._id}`,
         { method: "GET", credentials: "include" },
       );
       if (!res.ok) toast.error("Failed to fetch comments");
@@ -428,15 +434,18 @@ function CommentSidebar({ post, onClose }) {
     if (!newComment.trim()) return;
     setPosting(true);
     try {
-      const res = await fetch("${import.meta.env.API}/dash/createComment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          commentText: newComment,
-          postId: post._id,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/dash/createComment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            commentText: newComment,
+            postId: post._id,
+          }),
+        },
+      );
       if (!res.ok) toast.error("Failed to post comment");
       setNewComment("");
       fetchComments();
@@ -541,7 +550,7 @@ function CommentItem({ comment, onReplyPosted }) {
     const fetchCommentLikes = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.API}/dash/fetchLikes?comment=${comment._id}`,
+          `${import.meta.env.VITE_API_URL}/dash/fetchLikes?comment=${comment._id}`,
           { method: "GET", credentials: "include" },
         );
         if (!res.ok) toast.error("Failed to fetch likes");
@@ -561,8 +570,8 @@ function CommentItem({ comment, onReplyPosted }) {
     setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
     try {
       const url = wasLiked
-        ? "${import.meta.env.API}/dash/deleteLike"
-        : "${import.meta.env.API}/dash/likePost";
+        ? `${import.meta.env.VITE_API_URL}/dash/deleteLike`
+        : `${import.meta.env.VITE_API_URL}/dash/likePost`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -581,7 +590,7 @@ function CommentItem({ comment, onReplyPosted }) {
     setLoadingReplies(true);
     try {
       const res = await fetch(
-        `${import.meta.env.API}/dash/fetchComments?comment=${comment._id}`,
+        `${import.meta.env.VITE_API_URL}/dash/fetchComments?comment=${comment._id}`,
         { method: "GET", credentials: "include" },
       );
       if (!res.ok) toast.error("Failed to fetch replies");
@@ -602,15 +611,18 @@ function CommentItem({ comment, onReplyPosted }) {
   const handlePostReply = async () => {
     if (!replyText.trim()) return;
     try {
-      const res = await fetch("${import.meta.env.API}/dash/createComment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          commentText: replyText,
-          commentId: comment._id,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/dash/createComment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            commentText: replyText,
+            commentId: comment._id,
+          }),
+        },
+      );
       if (!res.ok) toast.error("Failed to post reply");
       setReplyText("");
       setShowReplyBox(false);

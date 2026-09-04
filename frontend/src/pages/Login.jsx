@@ -29,7 +29,7 @@ export default function AuthPage() {
     e.preventDefault();
     try {
       if (mode == "login") {
-        const res = await fetch("${import.meta.env.API}/user/login", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/user/login`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -48,19 +48,22 @@ export default function AuthPage() {
         localStorage.setItem("token", data.token);
         navigate("/home");
       } else {
-        const res = await fetch("${import.meta.env.API}/user/register", {
-          method: "POST",
-          credentials: "include",
-          body: (() => {
-            const data = new FormData();
-            data.append("name", form.name);
-            data.append("username", form.username);
-            data.append("email", form.email);
-            data.append("password", form.password);
-            if (dpURL) data.append("image", dpURL);
-            return data;
-          })(),
-        });
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/user/register`,
+          {
+            method: "POST",
+            credentials: "include",
+            body: (() => {
+              const data = new FormData();
+              data.append("name", form.name);
+              data.append("username", form.username);
+              data.append("email", form.email);
+              data.append("password", form.password);
+              if (dpURL) data.append("image", dpURL);
+              return data;
+            })(),
+          },
+        );
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           toast.error(data.message || "Registration failed");

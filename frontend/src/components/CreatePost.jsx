@@ -25,7 +25,7 @@ function CreatePost({ myUserId }) {
       const data = new FormData();
       data.append("postContent", postText);
       if (postImg) data.append("image", postImg);
-      const res = await fetch("${import.meta.env.API}/dash/home", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/dash/home`, {
         method: "POST",
         credentials: "include",
         body: data,

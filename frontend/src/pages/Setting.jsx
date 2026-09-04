@@ -49,12 +49,15 @@ export default function Settings() {
     setUsernameStatus("saving");
     setUsernameError("");
     try {
-      const res = await fetch("${import.meta.env.API}/dash/updateUsername", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/dash/updateUsername`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username }),
+        },
+      );
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Failed to update username");
       setUsernameStatus("saved");
@@ -78,12 +81,15 @@ export default function Settings() {
     }
     setPasswordStatus("saving");
     try {
-      const res = await fetch("${import.meta.env.API}/dash/updatePassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/dash/updatePassword`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ currentPassword, newPassword }),
+        },
+      );
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Failed to update password");
       setPasswordStatus("saved");
@@ -114,7 +120,7 @@ export default function Settings() {
       const data = new FormData();
       data.append("image", pfpFile);
       const res = await fetch(
-        "${import.meta.env.API}/dash/updateProfilePicture",
+        `${import.meta.env.VITE_API_URL}/dash/updateProfilePicture`,
         {
           method: "POST",
           credentials: "include",
@@ -139,10 +145,13 @@ export default function Settings() {
     setDeleting(true);
     setDeleteError("");
     try {
-      const res = await fetch("${import.meta.env.API}/dash/deleteAccount", {
-        method: "POST",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/dash/deleteAccount`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.message || "Failed to delete account");

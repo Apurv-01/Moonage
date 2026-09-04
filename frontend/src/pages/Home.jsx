@@ -21,7 +21,7 @@ export default function Home() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch("${import.meta.env.API}/dash/home", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/dash/home`, {
         method: "GET",
         credentials: "include",
       });

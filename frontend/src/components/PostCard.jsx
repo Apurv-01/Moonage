@@ -10,7 +10,7 @@ function PostCard({ post, rank, onCommentClick }) {
     const fetchPostLikes = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.API}/dash/fetchLikes/?post=${post._id}`,
+          `${import.meta.env.VITE_API_URL}/dash/fetchLikes/?post=${post._id}`,
           {
             method: "GET",
             credentials: "include",
@@ -32,8 +32,8 @@ function PostCard({ post, rank, onCommentClick }) {
     setLikeCount((c) => (liked ? c - 1 : c + 1));
     try {
       const url = wasLiked
-        ? "${import.meta.env.API}/dash/deleteLike"
-        : "${import.meta.env.API}/dash/likePost";
+        ? `${import.meta.env.VITE_API_URL}/dash/deleteLike`
+        : `${import.meta.env.VITE_API_URL}/dash/likePost`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

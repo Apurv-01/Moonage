@@ -9,7 +9,7 @@ export function CurrentUserProvider({ children }) {
   const fetchCurrentUser = async () => {
     setUserLoading(true);
     try {
-      const res = await fetch("${import.meta.env.API}/dash/me", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/dash/me`, {
         method: "GET",
         credentials: "include",
       });
