@@ -12,10 +12,7 @@ const createPostController = async (req, res) => {
     await post.save();
     res.status(200).json({ Message: "Post Saved" });
   } catch (error) {
-    res.status(500).json({
-      error: "internal Server Error",
-      message: error.message,
-    });
+    next(err);
   }
 };
 export default createPostController;

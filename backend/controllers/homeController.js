@@ -26,22 +26,11 @@ const homeController = async (req, res) => {
   const uniquePostIds = uniquePostIdsString.map(
     (id) => new mongoose.Types.ObjectId(id),
   );
-  // console.log("userId:", userId);
-  // console.log("followingIds:", followingIds);
 
-  // console.log("postIdsLikedbyFollowing:", postIdsLikedbyFollowing);
-
-  // console.log("postIdsCommentbyFollowing:", postIdsCommentbyFollowing);
-
-  // console.log("uniquePostIds:", uniquePostIds);
   //Liked,commented by people you follow or they are author
   const post = await postModel
     .find({
-      $or: [
-        { _id: { $in: uniquePostIds } },
-        { author: { $in: followingIds } },
-        // { author: userId },
-      ],
+      $or: [{ _id: { $in: uniquePostIds } }, { author: { $in: followingIds } }],
     })
     .populate("author", "_id username profile_picture_url")
     .sort({ createdAt: -1 });

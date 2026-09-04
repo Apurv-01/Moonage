@@ -10,10 +10,7 @@ const followUser = async (req, res) => {
     });
     res.status(200).json({ message: "Person Followed" });
   } catch (error) {
-    res.status(500).json({
-      error: "Cannot Follow Server Error",
-      message: error.message,
-    });
+    next(err);
   }
 };
 export default followUser;

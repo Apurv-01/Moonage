@@ -31,10 +31,7 @@ const fetchProfile = async (req, res) => {
       isFollowing,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Cannot fetch User Profile",
-      message: error.message,
-    });
+    next(err);
   }
 };
 export default fetchProfile;

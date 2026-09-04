@@ -12,7 +12,7 @@ const findUsers = async (req, res) => {
       .limit(10);
     return res.status(200).json({ users: users });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 

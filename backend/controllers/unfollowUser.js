@@ -25,10 +25,7 @@ const unfollowUser = async (req, res) => {
 
     res.status(200).json({ message: "Unfollowed successfully!" });
   } catch (error) {
-    res.status(500).json({
-      error: "Cannot unfollow user",
-      message: error.message,
-    });
+    next(err);
   }
 };
 

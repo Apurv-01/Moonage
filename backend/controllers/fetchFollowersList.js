@@ -17,10 +17,7 @@ const fetchFollowersList = async (req, res) => {
       followerList,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Internal Server Error",
-      message: error.message,
-    });
+    next(err);
   }
 };
 const fetchFollowingList = async (req, res) => {
@@ -35,17 +32,12 @@ const fetchFollowingList = async (req, res) => {
         _id: { $in: followingIds },
       })
       .select("username email");
-    console.log(followingList);
 
     res.status(200).json({
       followingList,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      error: "Internal Server Error",
-      message: error.message,
-    });
+    next(err);
   }
 };
 export { fetchFollowersList, fetchFollowingList };

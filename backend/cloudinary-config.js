@@ -9,15 +9,28 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid File Type!"), false);
+  }
+};
 const createUploader = (folder) => {
   const storage = new CloudinaryStorage({
     cloudinary,
     params: {
       folder: folder,
       allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      transformation: [{ width: 1200, height: 1200, crop: "limit" }],
     },
   });
-  return multer({ storage });
+  return multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 10 * 1024 * 1024 },
+  });
 };
 const uploadPP = createUploader("user_post_imgs");
 const uploadDP = createUploader("user_profile_imgs");

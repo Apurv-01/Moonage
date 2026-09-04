@@ -12,10 +12,7 @@ const fetchComments = async (req, res) => {
       .sort({ createdAt: -1 });
     res.status(200).json({ comments });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-      error: "Cannot fetch Comments Server Error",
-    });
+    next(err);
   }
 };
 export default fetchComments;

@@ -14,7 +14,7 @@ function CommentItem({ comment, onReplyPosted }) {
     const fetchCommentLikes = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/dash/fetchLikes?comment=${comment._id}`,
+          `${import.meta.env.API}/dash/fetchLikes?comment=${comment._id}`,
           { method: "GET", credentials: "include" },
         );
         if (!res.ok) toast.error("Failed to fetch likes");
@@ -34,8 +34,8 @@ function CommentItem({ comment, onReplyPosted }) {
     setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
     try {
       const url = wasLiked
-        ? "http://localhost:5000/api/dash/deleteLike"
-        : "http://localhost:5000/api/dash/likePost";
+        ? "${import.meta.env.API}/dash/deleteLike"
+        : "${import.meta.env.API}/dash/likePost";
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,7 +54,7 @@ function CommentItem({ comment, onReplyPosted }) {
     setLoadingReplies(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/dash/fetchComments?comment=${comment._id}`,
+        `${import.meta.env.API}/dash/fetchComments?comment=${comment._id}`,
         { method: "GET", credentials: "include" },
       );
       if (!res.ok) toast.error("Failed to fetch replies");
@@ -75,7 +75,7 @@ function CommentItem({ comment, onReplyPosted }) {
   const handlePostReply = async () => {
     if (!replyText.trim()) return;
     try {
-      const res = await fetch("http://localhost:5000/api/dash/createComment", {
+      const res = await fetch("${import.meta.env.API}/dash/createComment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

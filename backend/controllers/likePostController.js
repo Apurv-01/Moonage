@@ -20,11 +20,7 @@ const likePost = async (req, res) => {
     });
     res.status(200).json({ message: "Liked!" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      error: "Cannot Like",
-      message: error.message,
-    });
+    next(err);
   }
 };
 const unlikePost = async (req, res) => {
@@ -40,10 +36,7 @@ const unlikePost = async (req, res) => {
     await likeModel.deleteOne(filter);
     res.status(200).json({ message: "Unliked!" });
   } catch (error) {
-    res.status(500).json({
-      error: "ISE",
-      message: error.message,
-    });
+    next(err);
   }
 };
 export { likePost, unlikePost };

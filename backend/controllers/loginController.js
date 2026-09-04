@@ -10,16 +10,12 @@ const loginController = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Wrong Password" });
     req.session.userId = user._id;
-    req.session.pp = user.profile_picture_url;
-    req.session.username = user.username;
+
     res.status(200).json({
       msg: "Login Sucessful",
     });
   } catch (error) {
-    res.status(500).json({
-      error: "server Error",
-      message: error.message,
-    });
+    next(err);
   }
 };
 export default loginController;

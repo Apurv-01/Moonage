@@ -17,7 +17,7 @@ function CommentSidebar({ post, onClose }) {
   const fetchComments = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/dash/fetchComments?post=${post._id}`,
+        `${import.meta.env.API}/dash/fetchComments?post=${post._id}`,
         { method: "GET", credentials: "include" },
       );
       if (!res.ok) toast.error("Failed to fetch comments");
@@ -32,7 +32,7 @@ function CommentSidebar({ post, onClose }) {
     if (!newComment.trim()) return;
     setPosting(true);
     try {
-      const res = await fetch("http://localhost:5000/api/dash/createComment", {
+      const res = await fetch("${import.meta.env.API}/dash/createComment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

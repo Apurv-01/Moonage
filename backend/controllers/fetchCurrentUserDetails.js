@@ -1,16 +1,18 @@
 import mongoose from "mongoose";
+import userModel from "../models/userModel.js";
 const getLoggedInUserDetails = async (req, res) => {
   try {
+    const userId = req.session.userId;
+    const currentUser = await userModel.findById(userId);
+    if (!currentUser) return res.status(404).json({ error: "User not found" });
+
     res.status(200).json({
-      userId: req.session.userId,
-      username: req.session.username,
-      pp: req.session.pp,
+      userId: currentUser._id,
+      username: currentUser.username,
+      pp: currentUser.profile_picture_url,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "ISE",
-      message: error.message,
-    });
+    next(err);
   }
 };
 

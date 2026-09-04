@@ -1,39 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import { Heart, MessageCircle, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import SearchBar from "../../components/SearchBar.jsx";
-import Avatar from "../../components/Avatar.jsx";
-import Sidebar from "../../components/Sidebar.jsx";
-import CreatePost from "../../components/CreatePost.jsx";
-import CommentSidebar from "../../components/CommentSidebar.jsx";
-import PostCard from "../../components/PostCard.jsx";
+import SearchBar from "../components/SearchBar.jsx";
+import Avatar from "../components/Avatar.jsx";
+import Sidebar from "../components/Sidebar.jsx";
+import CreatePost from "../components/CreatePost.jsx";
+import CommentSidebar from "../components/CommentSidebar.jsx";
+import PostCard from "../components/PostCard.jsx";
+import { useCurrentUser } from "../components/CurrentUser.jsx";
 export default function Home() {
   const [activePost, setActivePost] = useState(null);
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const [myUserId, setMyUserId] = useState(null);
-  const [userLoading, setUserLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/dash/me", {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        setMyUserId(data);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setUserLoading(false);
-      }
-    };
-    fetchMe();
-  }, []);
+  const { currentUser, userLoading } = useCurrentUser();
 
   useEffect(() => {
     fetchPosts();
@@ -41,7 +21,7 @@ export default function Home() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/dash/home", {
+      const res = await fetch("${import.meta.env.API}/dash/home", {
         method: "GET",
         credentials: "include",
       });
@@ -59,7 +39,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <Sidebar myUserId={myUserId} loading={userLoading} />
+      <Sidebar myUserId={currentUser} loading={userLoading} />
 
       {/* Main column */}
       <div className="flex-1 flex flex-col relative min-w-0">
@@ -68,8 +48,8 @@ export default function Home() {
           <span className="font-semibold text-gray-900 md:hidden">Circle</span>
           <SearchBar />
           <Avatar
-            src={myUserId?.pp}
-            username={myUserId?.username}
+            src={currentUser?.pp}
+            username={currentUser?.username}
             size={32}
             className="w-8 h-8"
           />
@@ -79,7 +59,7 @@ export default function Home() {
         <main className="flex-1 flex justify-center px-4 py-6 pb-20 md:pb-6">
           <div className="w-full max-w-lg space-y-5">
             {/* Create post box */}
-            <CreatePost myUserId={myUserId} />
+            <CreatePost myUserId={currentUser} />
 
             {error && (
               <p className="text-sm text-red-500 text-center">{error}</p>
@@ -100,8 +80,6 @@ export default function Home() {
           </div>
         </main>
       </div>
-
-      {/* Mobile bottom tab bar */}
 
       {activePost && (
         <CommentSidebar post={activePost} onClose={() => setActivePost(null)} />

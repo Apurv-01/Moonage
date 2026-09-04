@@ -17,7 +17,7 @@ function SearchBar() {
     const timeout = setTimeout(async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/dash/searchUsers?q=${encodeURIComponent(searchQuery)}`,
+          `${import.meta.env.API}/dash/searchUsers?q=${encodeURIComponent(searchQuery)}`,
           {
             method: "GET",
             credentials: "include",

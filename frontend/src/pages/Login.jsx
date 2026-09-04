@@ -29,7 +29,7 @@ export default function AuthPage() {
     e.preventDefault();
     try {
       if (mode == "login") {
-        const res = await fetch("http://localhost:5000/api/user/login", {
+        const res = await fetch("${import.meta.env.API}/user/login", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -48,7 +48,7 @@ export default function AuthPage() {
         localStorage.setItem("token", data.token);
         navigate("/home");
       } else {
-        const res = await fetch("http://localhost:5000/api/user/register", {
+        const res = await fetch("${import.meta.env.API}/user/register", {
           method: "POST",
           credentials: "include",
           body: (() => {

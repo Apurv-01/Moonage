@@ -3,14 +3,14 @@ import { toast } from "react-toastify";
 import Avatar from "./Avatar";
 import { Heart, MessageCircle } from "lucide-react";
 
-function PostCard({ post, onCommentClick }) {
+function PostCard({ post, rank, onCommentClick }) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
   useEffect(() => {
     const fetchPostLikes = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/dash/fetchLikes/?post=${post._id}`,
+          `${import.meta.env.API}/dash/fetchLikes/?post=${post._id}`,
           {
             method: "GET",
             credentials: "include",
@@ -32,8 +32,8 @@ function PostCard({ post, onCommentClick }) {
     setLikeCount((c) => (liked ? c - 1 : c + 1));
     try {
       const url = wasLiked
-        ? "http://localhost:5000/api/dash/deleteLike"
-        : "http://localhost:5000/api/dash/likePost";
+        ? "${import.meta.env.API}/dash/deleteLike"
+        : "${import.meta.env.API}/dash/likePost";
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,6 +53,11 @@ function PostCard({ post, onCommentClick }) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
       <div className="flex items-center gap-3 px-4 py-3">
+        {rank && (
+          <span className="w-5 text-sm font-semibold text-gray-400 shrink-0">
+            {rank}
+          </span>
+        )}
         <Avatar
           src={post.author.profile_picture_url}
           username={post.author.username}

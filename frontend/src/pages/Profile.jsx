@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Grid3x3, Heart, MessageCircle, X } from "lucide-react";
 import { toast } from "react-toastify";
-import Sidebar from "../../components/Sidebar.jsx";
+import Sidebar from "../components/Sidebar.jsx";
+import { useCurrentUser } from "../components/CurrentUser.jsx";
 export default function Profile() {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -10,41 +11,23 @@ export default function Profile() {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [currentUserId, setCurrentUserId] = useState(null);
   const [followLoading, setFollowLoading] = useState(false);
   const [listView, setListView] = useState(null); // "followers" | "following" | null
   const [activePost, setActivePost] = useState(null);
-
-  useEffect(() => {
-    fetchCurrentUser();
-  }, []);
+  const { currentUser, userLoading } = useCurrentUser();
 
   useEffect(() => {
     if (userId) fetchProfile(userId);
   }, [userId]);
 
-  const fetchCurrentUser = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/dash/me", {
-        method: "GET",
-        credentials: "include",
-      });
-      if (!res.ok) toast.error("Not logged in");
-      const data = await res.json();
-      setCurrentUserId(data.userId);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const fetchProfile = async (id) => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/dash/user?userId=${id}`,
-        { method: "GET", credentials: "include" },
-      );
+      const res = await fetch(`${import.meta.env.API}/dash/user?userId=${id}`, {
+        method: "GET",
+        credentials: "include",
+      });
       if (!res.ok) toast.error("Cannot load this profile");
       const data = await res.json();
       setProfileData(data);
@@ -59,8 +42,8 @@ export default function Profile() {
     setFollowLoading(true);
     try {
       const url = profileData.isFollowing
-        ? "http://localhost:5000/api/dash/unfollowUser"
-        : "http://localhost:5000/api/dash/followUser";
+        ? "${import.meta.env.API}/dash/unfollowUser"
+        : "${import.meta.env.API}/dash/followUser";
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,12 +59,12 @@ export default function Profile() {
     }
   };
 
-  const isOwnProfile = currentUserId && currentUserId === userId;
+  const isOwnProfile = currentUser?.userId && currentUser?.userId === userId;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar myUserId={currentUser} loading={userLoading} />
       {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-3">
@@ -367,7 +350,7 @@ function UserListItem({
   const handleUnfollow = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/dash/unfollowUser", {
+      const res = await fetch("${import.meta.env.API}/dash/unfollowUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -430,7 +413,7 @@ function CommentSidebar({ post, onClose }) {
   const fetchComments = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/dash/fetchComments?post=${post._id}`,
+        `${import.meta.env.API}/dash/fetchComments?post=${post._id}`,
         { method: "GET", credentials: "include" },
       );
       if (!res.ok) toast.error("Failed to fetch comments");
@@ -445,7 +428,7 @@ function CommentSidebar({ post, onClose }) {
     if (!newComment.trim()) return;
     setPosting(true);
     try {
-      const res = await fetch("http://localhost:5000/api/dash/createComment", {
+      const res = await fetch("${import.meta.env.API}/dash/createComment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -558,7 +541,7 @@ function CommentItem({ comment, onReplyPosted }) {
     const fetchCommentLikes = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/dash/fetchLikes?comment=${comment._id}`,
+          `${import.meta.env.API}/dash/fetchLikes?comment=${comment._id}`,
           { method: "GET", credentials: "include" },
         );
         if (!res.ok) toast.error("Failed to fetch likes");
@@ -578,8 +561,8 @@ function CommentItem({ comment, onReplyPosted }) {
     setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
     try {
       const url = wasLiked
-        ? "http://localhost:5000/api/dash/deleteLike"
-        : "http://localhost:5000/api/dash/likePost";
+        ? "${import.meta.env.API}/dash/deleteLike"
+        : "${import.meta.env.API}/dash/likePost";
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -598,7 +581,7 @@ function CommentItem({ comment, onReplyPosted }) {
     setLoadingReplies(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/dash/fetchComments?comment=${comment._id}`,
+        `${import.meta.env.API}/dash/fetchComments?comment=${comment._id}`,
         { method: "GET", credentials: "include" },
       );
       if (!res.ok) toast.error("Failed to fetch replies");
@@ -619,7 +602,7 @@ function CommentItem({ comment, onReplyPosted }) {
   const handlePostReply = async () => {
     if (!replyText.trim()) return;
     try {
-      const res = await fetch("http://localhost:5000/api/dash/createComment", {
+      const res = await fetch("${import.meta.env.API}/dash/createComment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

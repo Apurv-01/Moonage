@@ -7,18 +7,50 @@ import userRoutes from "./routes/userRoutes.js";
 import homeRoutes from "./routes/homeRoutes.js";
 import http from "http";
 import { Server } from "socket.io";
-const app = express();
-
-app.set("view engine", "ejs");
-
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+import rateLimit from "express-rate-limit";
 configDotenv();
+
+const app = express();
+app.use(helmet());
+app.disable("x-powered-by");
+const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173"].filter(
+  Boolean,
+);
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else callback(new Error("CORS Voilation Detected"));
+    },
     credentials: true,
   }),
 );
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(mongoSanitize());
+app.set("trust proxy", 1);
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { message: "Too many requests, Chill Dady." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api", globalLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { message: "Too many requests, Chill Dady." },
+});
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+
 // const users = new Map();
 // const server = http.createServer(app);
 // const io = new Server(server, {
@@ -60,9 +92,9 @@ const sessionMiddleWare = session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "prod",
     maxAge: 1000 * 60 * 60 * 24,
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "prod" ? "strict" : "lax",
   },
 });
 app.use(sessionMiddleWare);
@@ -82,6 +114,29 @@ app.use("/api/dash", homeRoutes);
 app.get("/", (req, res) => {
   res.send({ msg: "Hello we are invading you in 3 2 1... boom" });
 });
+app.use((err, req, res, next) => {
+  console.error("SERVER ERROR LOG:", err);
+
+  const isProduction = process.env.NODE_ENV === "prod";
+
+  res.status(err.status || 500).json({
+    success: false,
+    message: isProduction
+      ? "An internal server error occurred. Please try again later."
+      : err.message,
+  });
+});
 app.listen(process.env.PORT || 5000, () => {
   console.log("hello world");
 });
+const gracefulShutdown = () => {
+  console.log("Received kill signal, shutting down gracefully...");
+  server.close(async () => {
+    console.log("Closed remaining connections.");
+    await mongoose.connection.close();
+    process.exit(0);
+  });
+};
+
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);

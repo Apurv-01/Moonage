@@ -1,9 +1,17 @@
 import mongoose from "mongoose";
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
+import { configDotenv } from "dotenv";
+configDotenv();
 
 const registerController = async (req, res) => {
   try {
+    const userCount = await userModel.countDocuments();
+    if (userCount >= process.env.MAX_USERS) {
+      return res.status(403).json({
+        message: "Not accepting new signups right now.",
+      });
+    }
     const { username, email, password } = req.body;
 
     const imgURL = req.file ? req.file.path : null;
@@ -22,10 +30,7 @@ const registerController = async (req, res) => {
     });
     res.status(200).json({ msg: "user registered" });
   } catch (error) {
-    res.status(500).json({
-      error: "Server error",
-      message: error.message,
-    });
+    next(err);
   }
 };
 export default registerController;
