@@ -46,7 +46,9 @@ export default function Home() {
       <div className="flex-1 flex flex-col relative min-w-0">
         {/* Top navbar */}
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          <span className="font-semibold text-gray-900 md:hidden">Circle</span>
+          <span className="font-semibold text-gray-900 md:hidden">
+            🌕 Moonage
+          </span>
           <SearchBar />
           <Avatar
             src={currentUser?.pp}
