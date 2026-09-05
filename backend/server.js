@@ -15,14 +15,25 @@ configDotenv();
 const app = express();
 app.use(helmet());
 app.disable("x-powered-by");
-const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173"].filter(
-  Boolean,
-);
-
+const requiredEnvVars = ["URI", "SESSION_SECRET", "CLIENT_URL"];
+for (const key of requiredEnvVars) {
+  if (!process.env[key]) {
+    console.error(`Missing required env var: ${key}`);
+    process.exit(1);
+  }
+}
+const allowedOrigins = [
+  process.env.CLIENT_URL?.replace(/\/$/, ""),
+  "http://localhost:5173",
+].filter(Boolean);
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        callback(null, true);
+      }
+      const cleanOrigin = origin.replace(/\/$/, "");
+      if (allowedOrigins.includes(cleanOrigin)) {
         callback(null, true);
       } else callback(new Error("CORS Voilation Detected"));
     },
@@ -95,13 +106,13 @@ mongoose.connect(process.env.URI).then(() => console.log("DB CONNECTO"));
 const sessionMiddleWare = session({
   name: "connect.sid",
   resave: false,
-  secret: "superSecret",
+  secret: process.env.SESSION_SECRET,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "prod",
+    secure: process.env.NODE_ENV === "production",
     maxAge: 1000 * 60 * 60 * 24,
-    sameSite: process.env.NODE_ENV === "prod" ? "strict" : "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   },
 });
 app.use(sessionMiddleWare);
@@ -109,13 +120,6 @@ app.use(sessionMiddleWare);
 //   sessionMiddleWare(socket.request, {}, next);
 // });
 app.use("/api/user", userRoutes);
-app.use((err, req, res, next) => {
-  console.error("Server Error:", err);
-  res.status(err.status || 500).json({
-    error: err.name || "Error",
-    message: err.message || "An unexpected error occurred",
-  });
-});
 app.use("/api/dash", homeRoutes);
 
 app.get("/", (req, res) => {
@@ -124,7 +128,7 @@ app.get("/", (req, res) => {
 app.use((err, req, res, next) => {
   console.error("SERVER ERROR LOG:", err);
 
-  const isProduction = process.env.NODE_ENV === "prod";
+  const isProduction = process.env.NODE_ENV === "production";
 
   res.status(err.status || 500).json({
     success: false,
