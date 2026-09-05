@@ -5,7 +5,7 @@ function ProtectRoute({ children }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/dash/me", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/dash/me`, {
           method: "GET",
           credentials: "include",
           cache: "no-store",
